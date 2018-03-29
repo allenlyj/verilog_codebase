@@ -50,7 +50,36 @@ module Converte_tb;
 		.valid(valid), 
 		.error(error)
 	);
-
+    task automatic push_string;
+    input reg[INPUT_WIDTH-1:0] base;
+    input integer length;
+    reg[OUTPUT_WIDTH-1:0] result_true;
+    integer i;
+    begin
+        sop = 1;
+        data = base;
+        result_true = 'd0;
+        for (i = 0; i < length; i = i+1) begin
+            @(posedge clk);
+            #2
+            sop = 0;
+            if (i == length-1)
+                eop = 1;
+            else
+                eop = 0;
+            data = $random%base+48;
+            result_true = result_true*base+data-48;
+        end
+        @ (posedge clk);
+        #2 eop = 0;
+        @ (posedge valid);
+        if (number != result_true)
+            $display("Incorrect result\n");
+        else
+            $display("Correct result:%d\n",result_true);
+    end
+    endtask
+    
 	initial begin
 		// Initialize Inputs
 		data = 0;
@@ -64,55 +93,13 @@ module Converte_tb;
         rst = 1;
         #100;
         rst = 0;
-        #22;
-        sop = 1;
-        data = 10;
-        #10
-        sop = 0;
-        data = 49;
-        #10
-        data = 54;
-        #10
-        data = 51;
-        eop = 1;
-        #10
-        eop = 0;
-        #50
-        sop = 1;
-        data = 12;
-        #10
-        sop = 0;
-        data = 59;
-        #10
-        data = 55;
-        #10
-        data=50;
-        eop = 1;
-        #10
-        eop = 0;
-        sop = 1;
-        data = 8;
-        #10
-        sop = 0;
-        data = 55;
-        #30
-        eop = 1;
-        #10
-        eop = 0;
-        sop = 1;
-        data = 10;
-        #10
-        sop = 0;
-        data = 49;
-        #10
-        data = 58;
-        #10
-        data = 57;
-        eop = 1;
-        #10
-        eop = 0;
-        
+
 		// Add stimulus here
+        #10
+        push_string(8,5);
+        push_string(10,4);
+        push_string(12,5);
+        push_string(2,18);
 	end
     
     always 
